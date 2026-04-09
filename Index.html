@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <title>World Rebuilder RPG</title>
     <style>
-        body { background: #222; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
-        canvas { background: #333; border: 4px solid #555; margin-top: 10px; cursor: crosshair; }
-        .stats { display: flex; gap: 20px; font-size: 1.2rem; margin: 10px; padding: 10px; background: #444; border-radius: 8px; }
-        .controls { margin: 10px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-        button { padding: 10px; cursor: pointer; background: #e67e22; border: none; color: white; font-weight: bold; border-radius: 4px; }
-        button:disabled { background: #777; cursor: not-allowed; }
+        body { background: #222; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
+        canvas { background: #333; border: 4px solid #555; margin-top: 10px; cursor: crosshair; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .stats { display: flex; gap: 20px; font-size: 1.2rem; margin: 10px; padding: 15px; background: #444; border-radius: 8px; border: 2px solid #e67e22; }
+        .controls { margin: 10px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 800px; }
+        button { padding: 12px 20px; cursor: pointer; background: #e67e22; border: none; color: white; font-weight: bold; border-radius: 4px; transition: 0.2s; }
+        button:hover:not(:disabled) { background: #d35400; transform: scale(1.05); }
+        button:disabled { background: #555; cursor: not-allowed; opacity: 0.6; }
+        .instructions { font-size: 0.9rem; color: #aaa; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -20,6 +22,8 @@
         <div>XP: <span id="xp">0</span> / <span id="xpReq">100</span></div>
     </div>
 
+    <div class="instructions">Buildings will appear at random locations. Characters move in after their house is built!</div>
+
     <div class="controls" id="shop-ui">
         </div>
 
@@ -27,12 +31,37 @@
 
 <script>
 /** * GAME DATA 
- * Add your 440+ characters and buildings here!
+ * These paths point to your folders on GitHub.
  */
 const BUILDINGS_DATA = [
-    { id: 1, name: "Starter Hut", cost: 100, lvl: 1, income: 5, img: "building1.png", charImg: "char1.png" },
-    { id: 2, name: "Merchant Shop", cost: 300, lvl: 2, income: 20, img: "building2.png", charImg: "char2.png" },
-    { id: 3, name: "Warrior Hall", cost: 800, lvl: 5, income: 0, img: "building3.png", charImg: "char3.png" }
+    { 
+        id: 1, 
+        name: "Starter Hut", 
+        cost: 100, 
+        lvl: 1, 
+        income: 5, 
+        img: "buildings/building1.png", 
+        charImg: "characters/char1.png" 
+    },
+    { 
+        id: 2, 
+        name: "Merchant Shop", 
+        cost: 300, 
+        lvl: 2, 
+        income: 20, 
+        img: "buildings/building2.png", 
+        charImg: "characters/char2.png" 
+    },
+    { 
+        id: 3, 
+        name: "Warrior Hall", 
+        cost: 800, 
+        lvl: 5, 
+        income: 0, 
+        img: "buildings/building3.png", 
+        charImg: "characters/char3.png" 
+    }
+    // You can keep adding up to 440 here!
 ];
 
 class Game {
@@ -40,8 +69,8 @@ class Game {
         this.money = 500;
         this.xp = 0;
         this.level = 1;
-        this.buildings = []; // Objects actually placed on map
-        this.npcs = [];      // Characters wandering around
+        this.buildings = []; 
+        this.npcs = [];      
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         
@@ -56,16 +85,18 @@ class Game {
     }
 
     getXpNeeded() {
+        // Progression formula to hit Level 100
         return Math.floor(Math.pow(this.level, 1.5) * 100);
     }
 
     addXp(amt) {
         this.xp += amt;
-        if (this.xp >= this.getXpNeeded()) {
-            this.xp = 0;
+        while (this.xp >= this.getXpNeeded()) {
+            this.xp -= this.getXpNeeded();
             this.level++;
-            this.renderShop(); // Refresh buttons for new unlocks
+            console.log("Level Up!");
         }
+        this.renderShop(); 
         this.updateUI();
     }
 
@@ -81,8 +112,11 @@ class Game {
         shop.innerHTML = "";
         BUILDINGS_DATA.forEach(b => {
             const btn = document.createElement('button');
-            btn.innerText = `Build ${b.name} ($${b.cost})`;
-            btn.disabled = (this.money < b.cost || this.level < b.lvl);
+            const levelLocked = this.level < b.lvl;
+            const tooExpensive = this.money < b.cost;
+            
+            btn.innerText = levelLocked ? `Unlock at Lvl ${b.lvl}` : `Build ${b.name} ($${b.cost})`;
+            btn.disabled = levelLocked || tooExpensive;
             btn.onclick = () => this.buyBuilding(b);
             shop.appendChild(btn);
         });
@@ -92,22 +126,17 @@ class Game {
         if (this.money >= data.cost) {
             this.money -= data.cost;
             
-            // Create building instance with random map position
             const newBldg = {
                 ...data,
-                x: Math.random() * (this.canvas.width - 50),
-                y: Math.random() * (this.canvas.height - 50),
+                x: 50 + Math.random() * (this.canvas.width - 150),
+                y: 50 + Math.random() * (this.canvas.height - 150),
                 imageObj: new Image()
             };
-            newBldg.imageObj.src = data.img; // Points to building1.png etc.
+            newBldg.imageObj.src = data.img; 
             
             this.buildings.push(newBldg);
-            
-            // Spawn the associated character
             this.spawnNpc(data.charImg);
-            
             this.addXp(50);
-            this.renderShop();
         }
     }
 
@@ -120,19 +149,20 @@ class Game {
             imageObj: new Image(),
             speed: 0.5 + Math.random()
         };
-        npc.imageObj.src = imgSrc; // Points to char1.png etc.
+        npc.imageObj.src = imgSrc; 
         this.npcs.push(npc);
     }
 
     collectIncome() {
-        this.buildings.forEach(b => this.money += b.income);
+        let earned = 0;
+        this.buildings.forEach(b => earned += b.income);
+        this.money += earned;
         this.updateUI();
         this.renderShop();
     }
 
     updateNpcs() {
         this.npcs.forEach(npc => {
-            // Simple wander logic: move toward target
             let dx = npc.targetX - npc.x;
             let dy = npc.targetY - npc.y;
             let dist = Math.sqrt(dx*dx + dy*dy);
@@ -141,7 +171,6 @@ class Game {
                 npc.x += (dx / dist) * npc.speed;
                 npc.y += (dy / dist) * npc.speed;
             } else {
-                // Pick new random spot to walk to
                 npc.targetX = Math.random() * this.canvas.width;
                 npc.targetY = Math.random() * this.canvas.height;
             }
@@ -153,23 +182,26 @@ class Game {
 
         // Draw Buildings
         this.buildings.forEach(b => {
-            // If image fails to load, draw a colored box as fallback
-            if (b.imageObj.complete) {
-                this.ctx.drawImage(b.imageObj, b.x, b.y, 60, 60);
+            if (b.imageObj.complete && b.imageObj.naturalWidth !== 0) {
+                this.ctx.drawImage(b.imageObj, b.x, b.y, 80, 80);
             } else {
-                this.ctx.fillStyle = "brown";
-                this.ctx.fillRect(b.x, b.y, 60, 60);
+                // Brown box placeholder
+                this.ctx.fillStyle = "#8b4513";
+                this.ctx.fillRect(b.x, b.y, 80, 80);
+                this.ctx.fillStyle = "white";
+                this.ctx.fillText(b.name, b.x, b.y - 5);
             }
         });
 
         // Draw NPCs
         this.npcs.forEach(n => {
-            if (n.imageObj.complete) {
-                this.ctx.drawImage(n.imageObj, n.x, n.y, 30, 30);
+            if (n.imageObj.complete && n.imageObj.naturalWidth !== 0) {
+                this.ctx.drawImage(n.imageObj, n.x, n.y, 40, 40);
             } else {
-                this.ctx.fillStyle = "cyan";
+                // Cyan circle placeholder
+                this.ctx.fillStyle = "#00ffff";
                 this.ctx.beginPath();
-                this.ctx.arc(n.x, n.y, 10, 0, Math.PI*2);
+                this.ctx.arc(n.x, n.y, 12, 0, Math.PI*2);
                 this.ctx.fill();
             }
         });
@@ -182,7 +214,6 @@ class Game {
     }
 }
 
-// Start the game
 const worldGame = new Game();
 </script>
 </body>
