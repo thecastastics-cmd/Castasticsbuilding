@@ -6,24 +6,24 @@
     <title>The Castastics Channel</title>
     <style>
         body { background: #000; color: #ffcc00; font-family: 'Arial Black', sans-serif; margin: 0; padding: 20px; text-align: center; }
-        h1 { font-size: 3rem; text-shadow: 2px 2px #333; margin-bottom: 10px; }
-        .container { max-width: 1000px; margin: auto; }
+        h1 { font-size: 3rem; text-shadow: 2px 2px #333; margin-bottom: 10px; text-transform: uppercase; }
+        .container { max-width: 1100px; margin: auto; }
         
         /* Video Player Area */
         #video-display { background: #111; padding: 20px; border: 4px solid #ffcc00; border-radius: 15px; margin-bottom: 40px; display: none; }
-        video { width: 100%; border-radius: 5px; }
-        #now-playing { margin-top: 10px; font-size: 1.2rem; text-transform: uppercase; }
+        video { width: 100%; border-radius: 5px; box-shadow: 0 0 15px #ffcc00; }
+        #now-playing { margin-top: 10px; font-size: 1.2rem; text-transform: uppercase; color: #fff; }
 
-        /* Grid Layout */
-        .section-title { border-bottom: 2px solid #ffcc00; padding: 10px; margin: 40px 0 20px; font-size: 1.5rem; }
-        .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-        .card { width: 180px; background: #1a1a1a; padding: 10px; border-radius: 10px; border: 2px solid #333; cursor: pointer; transition: 0.3s; }
-        .card:hover { border-color: #ffcc00; transform: scale(1.05); }
-        .card img { width: 100%; height: 250px; object-fit: cover; border-radius: 5px; }
-        .card p { margin: 10px 0 5px; font-size: 0.9rem; }
+        /* Sections */
+        .section-title { border-bottom: 3px solid #ffcc00; padding: 10px; margin: 40px 0 20px; font-size: 1.8rem; text-align: left; }
+        .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
         
-        /* Dropdown Styling */
-        select { background: #ffcc00; border: none; padding: 5px; border-radius: 5px; width: 100%; font-weight: bold; cursor: pointer; }
+        .card { width: 170px; background: #1a1a1a; padding: 10px; border-radius: 10px; border: 2px solid #333; cursor: pointer; transition: 0.3s; }
+        .card:hover { border-color: #ffcc00; transform: scale(1.05); }
+        .card img { width: 100%; height: 240px; object-fit: cover; border-radius: 5px; margin-bottom: 10px; }
+        .card p { margin: 5px 0; font-size: 0.85rem; color: #fff; height: 35px; overflow: hidden; }
+        
+        select { background: #ffcc00; border: none; padding: 8px; border-radius: 5px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 5px; font-family: sans-serif; }
     </style>
 </head>
 <body>
@@ -32,47 +32,67 @@
         <h1>THE CASTASTICS CHANNEL</h1>
 
         <div id="video-display">
-            <video id="main-player" controls>
+            <video id="main-player" controls poster="posters/logo.jpg">
                 <source id="video-src" src="" type="video/mp4">
             </video>
-            <div id="now-playing"></div>
+            <div id="now-playing">SELECT A STORY TO START</div>
         </div>
 
-        <div class="section-title">MOVIES</div>
+        <div class="section-title">MOVIES (9)</div>
         <div class="grid">
-            <div class="card" onclick="playMedia('G_DRIVE_LINK_HERE', 'Movie 1 Name')">
-                <img src="posters/movie1.jpg" alt="Movie 1">
-                <p>Movie 1 Name</p>
-            </div>
-            </div>
+            <div class="card" onclick="playMedia('G_DRIVE_DIRECT_LINK_1', 'Movie 1')"><img src="posters/movie1.jpg"><p>Movie 1</p></div>
+            <div class="card" onclick="playMedia('G_DRIVE_DIRECT_LINK_2', 'Movie 2')"><img src="posters/movie2.jpg"><p>Movie 2</p></div>
+            <div class="card" onclick="playMedia('G_DRIVE_DIRECT_LINK_3', 'Movie 3')"><img src="posters/movie3.jpg"><p>Movie 3</p></div>
+            <div class="card" onclick="playMedia('G_DRIVE_DIRECT_LINK_4', 'Movie 4')"><img src="posters/movie4.jpg"><p>Movie 4</p></div>
+            <div class="card" onclick="playMedia('G_DRIVE_DIRECT_LINK_5', 'Movie 5')"><img src="posters/movie5.jpg"><p>Movie 5</p></div>
+            <div class="card" onclick="playMedia('G_DRIVE_DIRECT_LINK_6', 'Movie 6')"><img src="posters/movie6.jpg"><p>Movie 6</p></div>
+            <div class="card" onclick="playMedia('G_DRIVE_DIRECT_LINK_7', 'Movie 7')"><img src="posters/movie7.jpg"><p>Movie 7</p></div>
+            <div class="card" onclick="playMedia('G_DRIVE_DIRECT_LINK_8', 'Movie 8')"><img src="posters/movie8.jpg"><p>Movie 8</p></div>
+            <div class="card" onclick="playMedia('G_DRIVE_DIRECT_LINK_9', 'Movie 9')"><img src="posters/movie9.jpg"><p>Movie 9</p></div>
+        </div>
 
         <div class="section-title">TV SHOWS</div>
         <div class="grid">
             
             <div class="card">
-                <img src="posters/castastics_show.jpg" alt="The Castastics">
+                <img src="posters/castastics_show.jpg">
                 <p>The Castastics</p>
-                <select onchange="playMedia(this.value, 'The Castastics')">
+                <select onchange="playMedia(this.value, 'The Castastics ' + this.options[this.selectedIndex].text)">
                     <option value="">Select Episode</option>
-                    <optgroup label="Season 1">
-                        <option value="videos/castastics/s1/ep1.mp4">Episode 1</option>
-                        <option value="videos/castastics/s1/ep2.mp4">Episode 2</option>
-                    </optgroup>
-                    <optgroup label="Season 2">
-                        <option value="videos/castastics/s2/ep1.mp4">Episode 1</option>
-                    </optgroup>
-                    </select>
+                    <optgroup label="Season 1 (8 Eps)">
+                        <option value="videos/castastics/s1/ep1.mp4">S1 Ep1</option>
+                        <option value="videos/castastics/s1/ep2.mp4">S1 Ep2</option>
+                        </optgroup>
+                    <optgroup label="Season 2 (17 Eps)">
+                        <option value="videos/castastics/s2/ep1.mp4">S2 Ep1</option>
+                        </optgroup>
+                    <optgroup label="Season 3 (5 Eps)">
+                        <option value="videos/castastics/s3/ep1.mp4">S3 Ep1</option>
+                        </optgroup>
+                    <optgroup label="Season 4 (30 Eps)">
+                        <option value="videos/castastics/s4/ep1.mp4">S4 Ep1</option>
+                        </optgroup>
+                    <optgroup label="Season 5 (21 Eps)">
+                        <option value="videos/castastics/s5/ep1.mp4">S5 Ep1</option>
+                        </optgroup>
+                </select>
             </div>
 
             <div class="card">
-                <img src="posters/idiotastics_show.jpg" alt="The Idiotastics">
+                <img src="posters/idiotastics_show.jpg">
                 <p>The Idiotastics</p>
-                <select onchange="playMedia(this.value, 'The Idiotastics')">
+                <select onchange="playMedia(this.value, 'The Idiotastics ' + this.options[this.selectedIndex].text)">
                     <option value="">Select Episode</option>
-                    <optgroup label="Season 1">
-                        <option value="videos/idiotastics/s1/ep1.mp4">Episode 1</option>
-                    </optgroup>
-                    </select>
+                    <optgroup label="Season 1 (6 Eps)">
+                        <option value="videos/idiotastics/s1/ep1.mp4">S1 Ep1</option>
+                        </optgroup>
+                    <optgroup label="Season 2 (6 Eps)">
+                        <option value="videos/idiotastics/s2/ep1.mp4">S2 Ep1</option>
+                        </optgroup>
+                    <optgroup label="Season 3 (6 Eps)">
+                        <option value="videos/idiotastics/s3/ep1.mp4">S3 Ep1</option>
+                        </optgroup>
+                </select>
             </div>
 
         </div>
@@ -96,4 +116,4 @@
         }
     </script>
 </body>
-</html>
+                            </html>
